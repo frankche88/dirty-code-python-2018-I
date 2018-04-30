@@ -53,6 +53,21 @@ class Test(unittest.TestCase):
 
         # assert
         self.assertTrue(speakerId);
+        
+    def test_register_HasBlogButHasRedFlags_ReturnsSpeakerId(self):
+        speaker = self.getSpeakerWithRedFlags();
+
+        speakerId = speaker.register(SqlServerRepository());
+
+        self.assertTrue(speakerId);
+    
+    def test_register_HasCertificationsButHasRedFlags_ReturnsSpeakerId(self):
+        speaker = self.getSpeakerWithRedFlags();
+        speaker.setCertifications(["cert1", "cert2", "cert3", "cert4"]);
+
+        speakerId = speaker.register(SqlServerRepository());
+
+        self.assertTrue(speakerId)
     
     def test_upper(self):
         self.assertEqual('foo'.upper(), 'FOOss')

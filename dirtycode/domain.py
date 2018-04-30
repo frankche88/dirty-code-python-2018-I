@@ -103,7 +103,7 @@ class Speaker(object):
         self._experience = 0
         self._hasBlog = False
         self._blogURL = ""
-        self._browser = BrowserName.Unknown
+        self._browser = WebBrowser ("test", 1)
         self._certifications = []
         self._employer = ""
         self._registrationFee = 0
@@ -127,11 +127,16 @@ class Speaker(object):
         if (not isGoodSpeaker):
             
             splitted = self._email.split("@")
-            emailDomain = splitted[splitted.length - 1]
-
-            isValidBrowser = not(self._browser.getName() == WebBrowser.BrowserName.InternetExplorer and self._browser.getMajorVersion() < self._MIN_BROWSER_VERSION);
+            emailDomain = splitted[len(splitted) - 1]
             
-            if (not self._domains.contains(emailDomain) and isValidBrowser):
+            isIE = self._browser.getName() == BrowserName.InternetExplorer
+            isLessThanMinVersion = self._browser.getMajorVersion() < self._MIN_BROWSER_VERSION
+
+            isValidBrowser = not(isIE and isLessThanMinVersion);
+            print(isValidBrowser) 
+            print("dominio en lista")
+            print(emailDomain in self._domains)
+            if (not (emailDomain in self._domains) and isValidBrowser):
                 isGoodSpeaker = True;
             
         return isGoodSpeaker;
@@ -190,7 +195,7 @@ class Speaker(object):
         self._certifications = certificates
     
     def setBlogURL(self, blogURL):
-        self._hasBlog = blogURL
+        self._blogURL = blogURL
         
     def setSessions(self, sessions):
         self._sessions = sessions
