@@ -30,17 +30,9 @@ class Session(object):
         '''
         Constructor
         '''
-        self._approved = True
-        self._programLanguage = ['Cobol', 'Punch Cards', 'Commodore', 'VBScript']
+        self._approved = False
         self._title = title
         self._description = description
-        
-        if(title and description) :
-            for languaje in self._programLanguage:
-                if(languaje in title or languaje in description):
-                    self._approved = False;
-                    break
-            
         
     def getTitle(self):
         return self._title
@@ -67,8 +59,6 @@ class WebBrowser(object):
             return BrowserName.InternetExplorer
         # TODO: Add more logic for properly sniffing for other browsers.
         return BrowserName.Unknown
-    
-    
 
     def getName(self):
         return self._name
@@ -91,85 +81,121 @@ class Speaker(object):
 
 
     def __init__(self):
-        self._MIN_BROWSER_VERSION = 9
-        self._MIN_CERTIFICATES = 3
-        self._MIN_YEAR_OF_EXPERIENCE = 10
-        self._domains = ("aol.com", "hotmail.com", "prodigy.com", "compuserve.com")
-        self._employers = ["Pluralsight", "Microsoft", "Google", "Fog Creek Software", "37Signals", "Telerik"]
-        
         self._firstName = ""
         self._lastName = ""
         self._email = ""
         self._experience = 0
         self._hasBlog = False
         self._blogURL = ""
-        self._browser = WebBrowser ("test", 1)
+        self._browser = None
         self._certifications = []
         self._employer = ""
         self._registrationFee = 0
         self._sessions = []
-        
-    def isSessionApproved(self):
-        isApproved = True
-        for session in self._sessions:
-            if(not session.isApproved()):
-                isApproved = False;
-                break;
-        return isApproved;
-    
-    def isGoodSpeaker(self):
-        isGoodSpeaker = False
-        haveExperience = self._experience > self._MIN_YEAR_OF_EXPERIENCE
-        haveMinCertificates = len(self._certifications) > self._MIN_CERTIFICATES
 
-        isGoodSpeaker = ((haveExperience or self._hasBlog or haveMinCertificates or self._employer in self._employers))
-        
-        if (not isGoodSpeaker):
-            
-            splitted = self._email.split("@")
-            emailDomain = splitted[len(splitted) - 1]
-            
-            isIE = self._browser.getName() == BrowserName.InternetExplorer
-            isLessThanMinVersion = self._browser.getMajorVersion() < self._MIN_BROWSER_VERSION
-
-            isValidBrowser = not(isIE and isLessThanMinVersion);
-            print(isValidBrowser) 
-            print("dominio en lista")
-            print(emailDomain in self._domains)
-            if (not (emailDomain in self._domains) and isValidBrowser):
-                isGoodSpeaker = True;
-            
-        return isGoodSpeaker;
     
     def register(self, repository):
-        speakerId = 0;        
         
-        if (not self._firstName):
-            raise ValueError("First Name is required")
+        speakerId = None
+		good = False
+		appr = False
+		#nt = [ "Microservices", "Node.js", "CouchDB", "KendoUI", "Dapper", "Angular2" ]
+		ot = ['Cobol', 'Punch Cards', 'Commodore', 'VBScript']
+		
+		#DEFECT #5274 DA 12/10/2012
+		#We weren't filtering out the prodigy domain so I added it.
+        domains = ["aol.com", "hotmail.com", "prodigy.com", "compuserve.com"]
         
-        if (not self._lastName):
-            raise ValueError("Last name is required.")
-        
-        if (not self._email):
-            raise  ValueError("Email is required.")
-                    
-        if (not self.isGoodSpeaker()):
-            raise SpeakerDoesntMeetRequirementsException("Speaker doesn't meet our abitrary and capricious standards.");
-        
-        if (len(self._sessions) == 0):
-            raise ValueError("Can't register speaker with no sessions to present.");
-                        
-        if (not self.isSessionApproved()):
-            raise NoSessionsApprovedException("No sessions approved.");
+        if (self._firstName):
+			if (self._lastName):
+				if (self._email):
+					#put list of employers in array
+					emps = ["Pluralsight", "Microsoft", "Google", "Fog Creek Software", "37Signals", "Telerik"]
+					
+					#DFCT #838 Jimmy
+					#We're now requiring 3 certifications so I changed the hard coded number. Boy, programming is hard.
+					good = ((self._exp > 10 or self._hasBlog or len(self._certifications) > 3 or self._employer in emps))
+					
+					if (not good):
+						#need to get just the domain from the email
+						splitted = self._email.split("@")
+						emailDomain = splitted[len(splitted) - 1]
+
+						if (not domains.contains(emailDomain) and (not(browser.getName() == BrowserName.InternetExplorer and browser.getMajorVersion() < 9))):
+							good = true
+
+					if (good):
+						#DEFECT #5013 CO 1/12/2012
+						#We weren't requiring at least one session
+						if (self._sessions.size() != 0):
+							for session in sessions:
+								#for (String tech : nt):
+								#    if (session.getTitle().contains(tech):
+								#        session.setApproved(true)
+								#        break
+								#    
+								#
+								for tech in ot:
+									if (tech in session.getTitle() or tech in session.getDescription()):
+										session.setApproved(false)
+										break
+									 else:
+										session.setApproved(true)
+										appr = true
+									
+								
+								
+							
+						 else:
+							raise ValueError("Can't register speaker with no sessions to present.")
+						
+						
+						if (appr):
+							#if we got this far, the speaker is approved
+							#let's go ahead and register him/her now.
+							#First, let's calculate the registration fee.
+							#More experienced speakers pay a lower fee.
+							if (self._exp <= 1):
+								self._registrationFee = 500
+							
+							else if (exp >= 2 and exp <= 3):
+								self._registrationFee = 250
+							
+							else if (exp >= 4 and exp <= 5):
+								self._registrationFee = 100
+							
+							else if (exp >= 6 and exp <= 9):
+								self._registrationFee = 50
+							
+							else:
+								self._registrationFee = 0
+							
+							
+							#Now, save the speaker and sessions to the db.
+							try:
+								speakerId = repository.saveSpeaker(this)
+							 catch (Exception e):
+								#in case the db call fails 
+							
+						 else:
+							raise NoSessionsApprovedException("No sessions approved.")
+						
+					 else:
+						raise SpeakerDoesntMeetRequirementsException("Speaker doesn't meet our abitrary and capricious standards.")
+					
+				 else:
+					raise ValueError("Email is required.")
+								
+			 else:
+				raise ValueError("Last name is required.")
+						
+		 else:
+			raise ValueError("First Name is required")
 
 
-        self._registrationFee = repository.getRegistrationFee(self._experience);
-        
+        return speakerId
 
-        speakerId = repository.saveSpeaker(self);
-
-
-        return speakerId;
+    
     def setFirstName(self, firstName):
         self._firstName = firstName
         
@@ -189,7 +215,7 @@ class Speaker(object):
         self._browser = webBrowser
     
     def setExp(self, experience):
-        self._experience = experience;
+        self._experience = experience
     
     def setCertifications(self, certificates):
         self._certifications = certificates
