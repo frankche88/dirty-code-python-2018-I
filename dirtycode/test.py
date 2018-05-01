@@ -4,9 +4,8 @@ Created on 29 abr. 2018
 @author: Pc
 '''
 import unittest
-from dirtycode.domain import Speaker, WebBrowser, Session
-from array import array
 from dirtycode.infrastructure import SqlServerRepository
+from dirtycode.domain import Speaker, WebBrowser, Session
 
 
 class Test(unittest.TestCase):
@@ -68,9 +67,6 @@ class Test(unittest.TestCase):
         speakerId = speaker.register(SqlServerRepository());
 
         self.assertTrue(speakerId)
-    
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOOss')
         
     #### util methds
     
