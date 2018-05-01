@@ -4,9 +4,10 @@ Created on 29 abr. 2018
 @author: Pc
 '''
 import unittest
-from dirtycode.infrastructure import SqlServerRepository
 from dirtycode.domain import Speaker, WebBrowser, Session
 
+from .infrastructure import SqlServerRepository
+from exceptions import *
 
 class Test(unittest.TestCase):
 
@@ -67,6 +68,35 @@ class Test(unittest.TestCase):
         speakerId = speaker.register(SqlServerRepository());
 
         self.assertTrue(speakerId)
+    
+    
+    def test_register_SingleSessionThatsOnOldTech_ThrowsNoSessionsApprovedException(self):
+        speaker = self.getSpeakerThatWouldBeApproved();
+        speaker.setSessions([Session("Cobol for dummies", "Intro to Cobol")]);
+        with self.assertRaises(NoSessionsApprovedException):
+            speaker.register(SqlServerRepository());
+        
+
+    def test_register_NoSessionsPassed_ThrowsArgumentException(self):
+        speaker = self.getSpeakerThatWouldBeApproved();
+        speaker.setSessions([]);
+        with self.assertRaises(ValueError):
+            speaker.register(self._repository);
+    
+    def test_register_DoesntAppearExceptionalAndUsingOldBrowser_ThrowsNoSessionsApprovedException(self):
+        speakerThatDoesntAppearExceptional = self.getSpeakerThatWouldBeApproved();
+        speakerThatDoesntAppearExceptional.setHasBlog(False);
+        speakerThatDoesntAppearExceptional.setBrowser(WebBrowser("IE", 6));
+        with self.assertRaises(SpeakerDoesntMeetRequirementsException):
+            speakerThatDoesntAppearExceptional.register(self._repository);
+    
+    
+    def test_register_DoesntAppearExceptionalAndHasAncientEmail_ThrowsNoSessionsApprovedException(self):
+        speakerThatDoesntAppearExceptional = self.getSpeakerThatWouldBeApproved()
+        speakerThatDoesntAppearExceptional.setHasBlog(False);
+        speakerThatDoesntAppearExceptional.setEmail("name@aol.com")
+        with self.assertRaises(SpeakerDoesntMeetRequirementsException):
+            speakerThatDoesntAppearExceptional.register(self._repository)
         
     #### util methds
     

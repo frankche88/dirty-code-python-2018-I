@@ -121,7 +121,7 @@ class Speaker(object):
                         splitted = self._email.split("@")
                         emailDomain = splitted[len(splitted) - 1]
 
-                        if (not domains.contains(emailDomain) and (not(self._browser.getName() == BrowserName.InternetExplorer and self._browser.getMajorVersion() < 9))):
+                        if (not (emailDomain in domains) and (not(self._browser.getName() == BrowserName.InternetExplorer and self._browser.getMajorVersion() < 9))):
                             good = True
 
                     if (good):
